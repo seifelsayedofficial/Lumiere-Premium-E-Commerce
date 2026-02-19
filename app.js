@@ -103,6 +103,58 @@ const API = {
   },
 };
 
+// MOBILE MENU - handles hamburger and mobile menu open/close
+const MobileMenu = {
+  init() {
+    const toggle = document.getElementById("mobile-menu-toggle");
+    const closeBtn = document.getElementById("mobile-menu-close");
+    const menu = document.getElementById("mobile-menu");
+
+    if (!menu) return;
+
+    if (toggle) {
+      toggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        menu.classList.toggle("open");
+        const expanded = menu.classList.contains("open");
+        toggle.setAttribute("aria-expanded", expanded ? "true" : "false");
+        document.body.style.overflow = expanded ? "hidden" : "";
+      });
+    }
+
+    if (closeBtn) {
+      closeBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        menu.classList.remove("open");
+        if (toggle) toggle.setAttribute("aria-expanded", "false");
+        document.body.style.overflow = "";
+      });
+    }
+
+    // Close mobile menu when tapping outside
+    document.addEventListener("click", (e) => {
+      if (!menu.contains(e.target) && toggle && !toggle.contains(e.target)) {
+        if (menu.classList.contains("open")) {
+          menu.classList.remove("open");
+          toggle.setAttribute("aria-expanded", "false");
+          document.body.style.overflow = "";
+        }
+      }
+    });
+
+    // Close on Escape
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        if (menu.classList.contains("open")) {
+          menu.classList.remove("open");
+          if (toggle) toggle.setAttribute("aria-expanded", "false");
+          document.body.style.overflow = "";
+        }
+      }
+    });
+  },
+};
+
 // STORE - application state
 const STORE = {
   state: {
@@ -341,14 +393,18 @@ const LANGUAGE = {
     if (!btn || !menu) return;
 
     // Toggle dropdown
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
       menu.classList.toggle("open");
+      const expanded = menu.classList.contains("open");
+      btn.setAttribute("aria-expanded", expanded ? "true" : "false");
     });
 
     // Close dropdown when clicking outside
     document.addEventListener("click", (e) => {
       if (!btn.contains(e.target) && !menu.contains(e.target)) {
         menu.classList.remove("open");
+        btn.setAttribute("aria-expanded", "false");
       }
     });
 
@@ -776,8 +832,8 @@ const FILTER = {
 // SEARCH - input handling
 const SEARCH = {
   init() {
-    const inputs = ["search-input", "search-input-mobile"];
-    const clears = ["search-clear", "search-clear-mobile"];
+    const inputs = ["search-input", "search-input-md", "search-input-mobile"];
+    const clears = ["search-clear", "search-clear-md", "search-clear-mobile"];
 
     inputs.forEach((id, idx) => {
       const input = document.getElementById(id);
@@ -809,6 +865,44 @@ const SEARCH = {
         });
       }
     });
+
+    // MD/LG search popover toggle
+    const toggle = document.getElementById("search-toggle-md");
+    const popover = document.getElementById("search-popover");
+    const mdInput = document.getElementById("search-input-md");
+
+    if (toggle && popover) {
+      toggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        popover.classList.toggle("open");
+        const open = popover.classList.contains("open");
+        toggle.setAttribute("aria-expanded", open ? "true" : "false");
+        popover.setAttribute("aria-hidden", open ? "false" : "true");
+        if (open && mdInput) mdInput.focus();
+      });
+
+      // close when clicking outside
+      document.addEventListener("click", (e) => {
+        if (!popover.contains(e.target) && !toggle.contains(e.target)) {
+          if (popover.classList.contains("open")) {
+            popover.classList.remove("open");
+            toggle.setAttribute("aria-expanded", "false");
+            popover.setAttribute("aria-hidden", "true");
+          }
+        }
+      });
+
+      // close on Escape
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          if (popover.classList.contains("open")) {
+            popover.classList.remove("open");
+            toggle.setAttribute("aria-expanded", "false");
+            popover.setAttribute("aria-hidden", "true");
+          }
+        }
+      });
+    }
   },
 
   _timer: null,
@@ -1146,14 +1240,18 @@ const CURRENCY_UI = {
     if (!btn || !menu) return;
 
     // Toggle dropdown
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
       menu.classList.toggle("open");
+      const expanded = menu.classList.contains("open");
+      btn.setAttribute("aria-expanded", expanded ? "true" : "false");
     });
 
     // Close dropdown when clicking outside
     document.addEventListener("click", (e) => {
       if (!btn.contains(e.target) && !menu.contains(e.target)) {
         menu.classList.remove("open");
+        btn.setAttribute("aria-expanded", "false");
       }
     });
 
@@ -1182,6 +1280,7 @@ const INIT = {
 
     LANGUAGE.init();
     CURRENCY_UI.init();
+    MobileMenu.init();
 
     const yearEl = document.getElementById("year");
     if (yearEl) {
